@@ -1,4 +1,4 @@
-// Copyright (c) 2010, Pierre-Alain Dorange.
+// Copyright (c) 2011, Pierre-Alain Dorange.
 // OpenLayers Map API for PmWiki.
 
 var linked = Array();

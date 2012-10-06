@@ -1,10 +1,11 @@
 OpenLayers API for PmWiki (OLA)
 ===============================
+http://www.pmwiki.org/wiki/Cookbook/OpenLayersAPI
 
 Copyright Statement 
 -------------------
-
-Copyright (c) 2011, Pierre-Alain Dorange
+Licence : GPL
+Copyright (c) 2011-2012, Pierre-Alain Dorange
 adapted from Google Map API from Benjamin C. Wilson (2006).
 
 Abstract
@@ -34,8 +35,8 @@ appropriate.  Specifically, this software should have the recipe file in the
 
 Note : OLA make use of OpenLayers library (javascript) using the online
 version available at : http://openlayers.org/api/OpenLayers.js
-If you need to do not really on OpenLayers servers of need a special
-version you can include your own in scripts folder.
+If you need to do not rely on OpenLayers servers or need a special
+version you can include your own OpenLayers in scripts folder.
  
 2. Configure the Site. 
 After the code is installed, you will need to configure
@@ -44,26 +45,30 @@ the site. This is typically done in the local/config.php file.
 You will need to include the recipe (e.g.
 "include_once("$FarmD/cookbook/OpenLayersAPI/ola.php");").
 
-Using the Google Map API for PmWiki
------------------------------------
+Using the OpenLayers/OSM API for PmWiki
+---------------------------------------
  
 Using this recipe is fairly straight forward. There are two types of map
 tools available: point and map. The map tool must be used to generate
 the map. Either the point or the line must also be used, and these types may
 be mixed. We will take each map tool in turn, beginning with the map tool.
  
-Using the Map Tool. The map tool generates the map itself. The map is located
+Using the Map Tool. 
+The map tool generates the map itself. The map is located
 where the directive is placed on the wiki page. Specifically, the map tool
 returns an empty DIV statement which the Google software uses to embed the
 map. The map tool provides several options which help control the use of the
 map. Each of these options may be configured by the site administrator, or
-set by the editor for a specific map. These options include:
+set by the editor for a specific map. 
+These options include:
 
    * 'mapid' (default 'map'): The mapid option allows the editor to determine 
      the CSS name for the map. This allows multiple maps on a single page.
    * 'view' (default 'mapnik'): The view obtion allows the editor to set the
      initial display of the map. There are three displays available: 'mapnik',
-     'osma' and 'openmapquest'.
+     'cyclemap' and 'openmapquest'.
+     user can specify multiple views, final can switch using the layer controler
+     if this controller is activated
    * 'height' (default 300px): The height option the editor to set the height
      of the map. This value responds to CSS values (e.g. pixels, em, pt,
      percent, etc.)
@@ -91,7 +96,8 @@ set by the editor for a specific map. These options include:
      * The attribution control display openstreetmap attribution over the map
      * the scale control display the current scale of the view
 
-Using the Point Tool. The point tool places a marker at the designated spot.
+Using the Point Tool. 
+The point tool places a marker at the designated spot.
 The location is determined by latitude and longitude settings. Additionally,
 the point can contain a link and/or text. (Coming soon) Finally, the marker
 look can be determined using the icon option. The options include:
@@ -106,3 +112,4 @@ look can be determined using the icon option. The options include:
    * icon (not active): This option allows the editor to use any of a
      number of icons to distinguish points on the map. This includes letters,
      numbers, colors and shapes.
+

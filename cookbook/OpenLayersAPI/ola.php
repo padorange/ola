@@ -3,18 +3,22 @@
  OpenLayers API for PmWiki 
  =========================
  
- version 0.1 (alpha)
+ version 0.2 (alpha)
  
  Copyright Statement 
  -------------------
  
- Copyright (c) 2011, Pierre-Alain Dorange.
+ Copyright (c) 2011-2012, Pierre-Alain Dorange.
  OpenLayers Map API for PmWiki.
  Adapted from :
     Google Map API for PmWiki.
     Copyright (c) 2006, Benjamin C. Wilson. All Rights Reserved.
     This copyright statement must accompany this script.
 
+ History
+ -------
+ 0.2 : add support for CycleMap layer in OSM (replacing old osma rendering)
+ 
 */
 
 define('OLAPATH', dirname(__FILE__) . '/');
@@ -101,7 +105,7 @@ class OlaMap
 {
     var $views_js = array(
       'mapnik' => 'new OpenLayers.Layer.OSM.Mapnik("Mapnik")',
-      'osma' => 'new OpenLayers.Layer.OSM.Osmarender("Osmarender")',
+      'cyclemap' => 'new OpenLayers.Layer.OSM.CycleMap("CycleMap")',
       'openmapquest' => 'new OpenLayers.Layer.OSM.OpenMapQuest("OpenMapQuest")'
     );
     var $views = array();
@@ -207,7 +211,7 @@ class OlaPoint
     $olapath=OLAPATH;
     $ret="var size = new OpenLayers.Size(21,25);\n";
     $ret.="var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);\n";
-    $ret.="var icon = new OpenLayers.Icon('\$FarmPubDirUrl/scripts/OpenLayers/img/marker.png', size, offset);\n";
+    $ret.="var icon = new OpenLayers.Icon('http://openlayers.org/api/img/marker.png', size, offset);\n";
     $ret.="$markerLayer.addMarker(new OpenLayers.Marker(new OpenLayers.LonLat($lon,$lat).transform($map_id.displayProjection, $map_id.projection),icon));\n";
     
     return $ret;
