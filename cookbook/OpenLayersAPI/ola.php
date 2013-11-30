@@ -3,12 +3,12 @@
  OpenLayers API for PmWiki 
  =========================
  
- version 0.2 (alpha)
+ version 0.3 (alpha)
  
  Copyright Statement 
  -------------------
  
- Copyright (c) 2011-2012, Pierre-Alain Dorange.
+ Copyright (c) 2011-2012, Pierre-Alain Dorange, with a few additions made by StefCT (2013).
  OpenLayers Map API for PmWiki.
  Adapted from :
     Google Map API for PmWiki.
@@ -385,6 +385,31 @@ function olaMarkup($type, $args) {
         global $MarkupFrame;
         // Create The Map Object and set attributes.
         $OlaMap = ($opts['id']) ? new OlaMap($opts['id']) : new OlaMap();
+
+        //Additions by StefCT --Start---
+        if ($opts['link']) {
+                global $FmtPV; 
+                $FmtPV['$OSMLink'] = "'".$opts['link']."'";
+                preg_match('/mlat=(?P<lat>[^&#]*).*mlon=(?P<lon>[^&#]*)/', $opts['link'], $matchespoint);
+                preg_match('/map=(?P<zoom>[^\/]*)\/(?P<lat>[^\/]*)\/(?P<lon>[^\/]*)/', $opts['link'], $matchesmap);
+                if ($matchesmap["lat"] && $matchesmap["lon"]) {
+                    $OlaMap->lat = $matchesmap['lat'];
+                    $OlaMap->lon = $matchesmap['lon'];
+                }
+                if ($matchesmap["lat"] && $matchesmap["lon"]) {
+                    $OlaMap->zoom = $matchesmap['zoom'];
+                        }
+                if ($matchespoint["lat"] && $matchespoint["lon"]) {
+                        global $OlaPoints;
+                        // Build the Point object.
+                        $point = new OlaPoint($matchespoint['lat'], $matchespoint['lon']);
+                        // Add the point to the Collection.
+                        array_push($OlaPoints, $point);
+                        $ret .= ($OlaDebug) ?  "<pre>".Keep(print_r($point,1)) : '';
+                        }
+                }
+        //Additions by StefCT --End--
+
         if ($opts['ctrl']) $controls = (array) explode(',', $opts['ctrl']);
         $OlaMap->setControl($controls);
         if ($opts['view']) $views = (array) explode(',', $opts['view']);
@@ -402,7 +427,7 @@ function olaMarkup($type, $args) {
         // and give the map's target.
         if (!$MarkupFrame[0]['posteval']['mymarkup'])
           $MarkupFrame[0]['posteval']['mymarkup'] = 'olaCleanup();';
-        $ret = Keep("<div id='{$OlaMap->id}'></div>");
+        $ret .= Keep("<noscript id='js-warning'><p>Javascript is disabled, please enable it first to view the map!</p></noscript><div id='{$OlaMap->id}'></div>"); // added by StefCT
         $ret .= ($OlaDebug) ?  "<pre>".Keep(print_r($OlaMap,1)) : '';
         break;
 
