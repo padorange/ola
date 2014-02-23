@@ -3,12 +3,12 @@
  OpenLayers API for PmWiki 
  =========================
  
- version 0.3 (alpha)
+ version 0.4 (alpha)
  
  Copyright Statement 
  -------------------
  
- Copyright (c) 2011-2012, Pierre-Alain Dorange, with a few additions made by StefCT (2013).
+ Copyright (c) 2011-2012, Pierre-Alain Dorange, with a few additions made by StefCT (2013-2014).
  OpenLayers Map API for PmWiki.
  Adapted from :
     Google Map API for PmWiki.
@@ -18,6 +18,7 @@
  History
  -------
  0.2 : add support for CycleMap layer in OSM (replacing old osma rendering)
+ 0.4 : add support for PHP 5.5
  
 */
 
@@ -50,7 +51,16 @@ $OlaVersion = '0.1';
 # * (:ola-map [options]:)
 # * (:ola-point lat lon [options]:)
 # * (:ola-line lat lon [options]:)
-Markup('ola', '_begin', '/\(:ola-(\S+)\s?(.*?):\)/ie',"olaMarkup('$1','$2');");
+
+if(function_exists('Markup_e'))
+        {
+        Markup_e('ola', '_begin', '/\(:ola-(\S+)\s?(.*?):\)/i',"olaMarkup(\$m[1],\$m[2]);");
+        }
+else
+        {
+        Markup('ola', '_begin', '/\(:ola-(\S+)\s?(.*?):\)/ie',"olaMarkup('$1','$2');");
+        }
+
 
 class OlaLine
 {
