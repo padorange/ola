@@ -199,7 +199,6 @@ class OlaMap
 
 class OlaPoint
 {
-  var $icon = '';
   var $lat = 0.0;
   var $lon = 0.0;
   var $message = '';
@@ -209,21 +208,17 @@ class OlaPoint
     $this->id = $GmaPointPopulation++;
     if ($lat && $lon) { $this->lat = $lat; $this->lon = $lon; }
   }
-  
-  function icon() { return $this->_quote($this->icon);}
 
-  function point($map_id='map',$markerLayer) {
-    $icon = $this->icon();
+  function point($map_id='map',$vectorLayer,$counter) {
     $lat = $this->lat;
     $lon = $this->lon;
     $text = $this->message();
     $title = $this->_quote($this->title);
-    $olapath=OLAPATH;
-    $ret="var size = new OpenLayers.Size(21,25);\n";
-    $ret.="var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);\n";
-    $ret.="var icon = new OpenLayers.Icon('http://openlayers.org/api/img/marker.png', size, offset);\n";
-    $ret.="$markerLayer.addMarker(new OpenLayers.Marker(new OpenLayers.LonLat($lon,$lat).transform($map_id.displayProjection, $map_id.projection),icon));\n";
-    
+
+	//Generate feature point, include attributes for display in popup and point style
+	$ret="features[$counter] = new OpenLayers.Feature.Vector(toMercator(new OpenLayers.Geometry.Point($lon, $lat)), 
+			{ title: '$title', text: $text, position: 'lon: $lon, lat: $lat' }, 
+			{ fillColor : '#FF0000', fillOpacity : 0.8, strokeColor : '#690000', strokeOpacity : 1, strokeWidth : 1, pointRadius : 8 });\n";
     return $ret;
   }
   
@@ -266,7 +261,7 @@ function olaCleanup() {
   $clat = $OlaMap->lat;
   $clon = $OlaMap->lon;
   $map_id = $OlaMap->id;
-  $markerLayer = 'markerLayer';
+  $vectorLayer = 'vectorLayer';
   
   $HTMLStylesFmt['olmap_api'] 
      = "div#$map_id{ height: $height; width: $width; }";
@@ -280,15 +275,14 @@ function olaCleanup() {
   $views = $OlaMap->getViews();
   $zoom = $OlaMap->zoom or 'null';
   $points = '';
+  $counter = 0;
+  
   foreach ($OlaPoints as $p) 
   { 
-    if ($points=='') 
-    {
-      $points="var $markerLayer = new OpenLayers.Layer.Markers('Markers',{ projection:$map_id.displayProjection } );\n";
-      $points.="$map_id.addLayer($markerLayer);\n";
-    }
-    $points .= $p->point($map_id,$markerLayer);
+	  $points .= $p->point($map_id,$vectorLayer,$counter);
+	  $counter++;
   }
+  
   //$lines = '';
   //$overlay = '';
   //foreach ($OlaLines as $l) { 
@@ -312,12 +306,6 @@ function olaCleanup() {
   //    Copyright (c) 2006, Benjamin C. Wilson. All Rights Reserved.
   //    This copyright statement must accompany this script.
 
-    var from_htmls = [];
-    var htmls = [];
-    var markers = [];
-    var points = [];
-    var to_htmls = [];
-    var i = 0;
     var $map_id = new OpenLayers.Map('$map_id', 
     	{
     		maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
@@ -327,11 +315,52 @@ function olaCleanup() {
 			projection: new OpenLayers.Projection("EPSG:900913"),
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
     	});
-$points
-//$lines
-$controls
-$views
 	
+	//Transform points to match map projection
+	var toMercator = OpenLayers.Projection.transforms['EPSG:4326']['EPSG:3857'];
+	
+	//create array to hold feature points
+	var features = [];
+	
+$points
+
+	//Create vector layer to hold vector points
+	//Add listeners to create and destroy popups for points
+    var $vectorLayer = new OpenLayers.Layer.Vector('Points', {
+        eventListeners:{
+			//add popup if mouse is hovering over feature
+            'featureselected':function(evt){
+                var feature = evt.feature;
+                var popup = new OpenLayers.Popup.FramedCloud("popup", OpenLayers.LonLat.fromString(feature.geometry.toShortString()),null,
+				"<div style='font-size:.8em;text-align:center;'>" + feature.attributes.text + "</div>",
+                null,false);
+                feature.popup = popup;
+                map.addPopup(popup);
+            },
+			//remove popup if mouse is not hovering over feature anymore
+            'featureunselected':function(evt){
+                var feature = evt.feature;
+                map.removePopup(feature.popup);
+                feature.popup.destroy();
+                feature.popup = null;
+            }
+        }
+    });
+	
+	//Add feature array to vector layer
+	$vectorLayer.addFeatures(features);
+	
+	//Add vector layer to map
+	$map_id.addLayer($vectorLayer);
+
+$controls
+
+	//Create and add control to select features
+    var selectControl = new OpenLayers.Control.SelectFeature($vectorLayer,{ hover:true, autoActivate:true }); 
+	map.addControl(selectControl);
+
+$views
+
 	var latlon= new OpenLayers.LonLat($clon, $clat).transform($map_id.displayProjection, $map_id.projection);
     $map_id.setCenter(latlon,$zoom);
 
@@ -446,7 +475,6 @@ function olaMarkup($type, $args) {
         global $OlaPoints;
         // Build the Point object.
         $point = new OlaPoint($opts['lat'], $opts['lon']);
-        $point->icon = olaDefaults($opts['icon'], '');
         $point->message .= olaDefaults($opts['text'], '');
         if ($opts['link']) $ret .= $point->anchor($opts['link']);
         // Add the point to the Collection.
